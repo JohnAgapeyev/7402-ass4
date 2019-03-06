@@ -25,6 +25,9 @@ def f(i, k, x):
 def round(i, k, L, R):
     return R, [a ^ b for (a,b) in zip(L, f(i, k, R))]
 
+
+# Args are [mode] [input filename] [output filename]
+# mode is 'e' for encrypt, else decrypt
 if __name__ == '__main__':
     if len(sys.argv[1:]) < 2:
         print("give me mode!")
@@ -65,4 +68,5 @@ if __name__ == '__main__':
             #Write the ciphertext block back
             P[i * 16 : i * 16 + 16] = R + L
         P = pkcs7_strip(P)
-        print(P)
+        with open(sys.argv[3], 'wb') as out:
+            out.write(P)
