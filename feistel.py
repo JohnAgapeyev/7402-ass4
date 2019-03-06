@@ -50,11 +50,13 @@ if __name__ == '__main__':
         P = pkcs7_pad(bytearray(open(sys.argv[2], 'rb').read()))
         #i is block num
         for i in range(len(P) // 16):
+            start_block = i * 16
+            end_block = start_block + 16
             #Grab the block
-            B = P[i * 16 : i * 16 + 16]
+            B = P[start_block : end_block]
             B = process_block(B, range(round_count), k)
             #Write the block back
-            P[i * 16 : i * 16 + 16] = B
+            P[start_block : end_block] = B
         with open(sys.argv[3], 'wb') as out:
             out.write(P)
     else:
@@ -63,11 +65,13 @@ if __name__ == '__main__':
             raise ValueError('Ciphertext is not a valid length, it must be corrupted')
         #i is block num
         for i in range(len(P) // 16):
+            start_block = i * 16
+            end_block = start_block + 16
             #Grab the block
-            B = P[i * 16 : i * 16 + 16]
+            B = P[start_block : end_block]
             B = process_block(B, reversed(range(round_count)), k)
             #Write the block back
-            P[i * 16 : i * 16 + 16] = B
+            P[start_block : end_block] = B
         P = pkcs7_strip(P)
         with open(sys.argv[3], 'wb') as out:
             out.write(P)
