@@ -12,34 +12,56 @@ def pkcs7_pad(x):
 
 def f(i, k, x):
     for elem in x:
-        elem *= i
-        elem <<= k
+        elem *= 3
+        elem <<= 1
     return x
 
-P = bytearray('abcdefghijklmno', 'utf8')
+if __name__ == '__main__':
+    if len(sys.argv[1:]) < 2:
+        print("give me mode!")
+        sys.exit(1)
 
-P = pkcs7_pad(P)
+    K = 7
 
-print(P)
-
-K = 7
-
-#i is block num, j is round number
-for i in range(len(P) // 16):
-    #Grab the block
-    B = P[i * 16 : i * 16 + 16]
-    #Split the block
-    L, R = B[:8], B[8:]
-    for j in range(8):
-        # Call f() with round num, key, and input
-        X = f(j, K, R)
-        #Xor Left half with f() result
-        X = [a ^ b for (a,b) in zip(L, X)]
-        if j < 7:
-            #Swap the two halfs
-            L = R
-            R = X
-    #Write the ciphertext block back
-    P[i * 16 : i * 16 + 16] = L + R
-
-print(P)
+    if sys.argv[1] == 'e':
+        P = pkcs7_pad(bytearray(open(sys.argv[2], 'rb').read()))
+        #i is block num, j is round number
+        for i in range(len(P) // 16):
+            #Grab the block
+            B = P[i * 16 : i * 16 + 16]
+            #Split the block
+            L, R = B[:8], B[8:]
+            for j in range(8):
+                # Call f() with round num, key, and input
+                X = f(j, K, R)
+                #Xor Left half with f() result
+                X = [a ^ b for (a,b) in zip(L, X)]
+                if j < 7:
+                    #Swap the two halfs
+                    L = R
+                    R = X
+            #Write the ciphertext block back
+            P[i * 16 : i * 16 + 16] = L + R
+        with open(sys.argv[3], 'wb') as out:
+            out.write(P)
+    else:
+        P = bytearray(open(sys.argv[2], 'rb').read())
+        print(P)
+        #i is block num, j is round number
+        for i in range(len(P) // 16):
+            #Grab the block
+            B = P[i * 16 : i * 16 + 16]
+            #Split the block
+            L, R = B[:8], B[8:]
+            for j in reversed(range(8)):
+                # Call f() with round num, key, and input
+                X = f(j, K, R)
+                #Xor Left half with f() result
+                X = [a ^ b for (a,b) in zip(L, X)]
+                if True:
+                    #Swap the two halfs
+                    L = R
+                    R = X
+            #Write the ciphertext block back
+            P[i * 16 : i * 16 + 16] = L + R
+        print(P)
