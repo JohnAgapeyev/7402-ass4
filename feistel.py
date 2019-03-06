@@ -1,6 +1,5 @@
 #!/bin/python3
 
-import os
 import sys
 
 def pkcs7_pad(x):
@@ -18,19 +17,25 @@ def pkcs7_strip(x):
 
 def f(i, k, x):
     for elem in x:
-        elem *= 3
-        elem <<= 1
+        elem *= i
+        elem <<= k
     return x
 
 def round(i, k, L, R):
     return R, [a ^ b for (a,b) in zip(L, f(i, k, R))]
 
+def process_block(B, rounds, subkeys):
+    #Split the block
+    L, R = B[:8], B[8:]
+    for j in rounds:
+        L, R = round(j, subkeys[j], L, R)
+    return R + L
 
 # Args are [mode] [input filename] [output filename]
 # mode is 'e' for encrypt, else decrypt
 if __name__ == '__main__':
-    if len(sys.argv[1:]) < 2:
-        print("give me mode!")
+    if len(sys.argv[1:]) != 3:
+        print("give me args!")
         sys.exit(1)
 
     round_count = 8
@@ -43,30 +48,26 @@ if __name__ == '__main__':
 
     if sys.argv[1] == 'e':
         P = pkcs7_pad(bytearray(open(sys.argv[2], 'rb').read()))
-        #i is block num, j is round number
+        #i is block num
         for i in range(len(P) // 16):
             #Grab the block
             B = P[i * 16 : i * 16 + 16]
-            #Split the block
-            L, R = B[:8], B[8:]
-            for j in range(round_count):
-                L, R = round(j, k[j], L, R)
-            #Write the ciphertext block back
-            P[i * 16 : i * 16 + 16] = R + L
+            B = process_block(B, range(round_count), k)
+            #Write the block back
+            P[i * 16 : i * 16 + 16] = B
         with open(sys.argv[3], 'wb') as out:
             out.write(P)
     else:
         P = bytearray(open(sys.argv[2], 'rb').read())
-        #i is block num, j is round number
+        if len(P) % 16 != 0:
+            raise ValueError('Ciphertext is not a valid length, it must be corrupted')
+        #i is block num
         for i in range(len(P) // 16):
             #Grab the block
             B = P[i * 16 : i * 16 + 16]
-            #Split the block
-            L, R = B[:8], B[8:]
-            for j in reversed(range(round_count)):
-                L, R = round(j, k[j], L, R)
-            #Write the ciphertext block back
-            P[i * 16 : i * 16 + 16] = R + L
+            B = process_block(B, reversed(range(round_count)), k)
+            #Write the block back
+            P[i * 16 : i * 16 + 16] = B
         P = pkcs7_strip(P)
         with open(sys.argv[3], 'wb') as out:
             out.write(P)
