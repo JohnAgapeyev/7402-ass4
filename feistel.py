@@ -22,15 +22,21 @@ def f(i, k, x):
         elem <<= 1
     return x
 
-def round(i, K, L, R):
-    return R, [a ^ b for (a,b) in zip(L, f(i, K, R))]
+def round(i, k, L, R):
+    return R, [a ^ b for (a,b) in zip(L, f(i, k, R))]
 
 if __name__ == '__main__':
     if len(sys.argv[1:]) < 2:
         print("give me mode!")
         sys.exit(1)
 
+    round_count = 8
+
+    #Master secret key
     K = 7
+
+    #Subkey generation, not really lol
+    k = [K] * round_count
 
     if sys.argv[1] == 'e':
         P = pkcs7_pad(bytearray(open(sys.argv[2], 'rb').read()))
@@ -40,8 +46,8 @@ if __name__ == '__main__':
             B = P[i * 16 : i * 16 + 16]
             #Split the block
             L, R = B[:8], B[8:]
-            for j in range(8):
-                L, R = round(j, K, L, R)
+            for j in range(round_count):
+                L, R = round(j, k[j], L, R)
             #Write the ciphertext block back
             P[i * 16 : i * 16 + 16] = R + L
         with open(sys.argv[3], 'wb') as out:
@@ -54,8 +60,8 @@ if __name__ == '__main__':
             B = P[i * 16 : i * 16 + 16]
             #Split the block
             L, R = B[:8], B[8:]
-            for j in reversed(range(8)):
-                L, R = round(j, K, L, R)
+            for j in reversed(range(round_count)):
+                L, R = round(j, k[j], L, R)
             #Write the ciphertext block back
             P[i * 16 : i * 16 + 16] = R + L
         P = pkcs7_strip(P)
