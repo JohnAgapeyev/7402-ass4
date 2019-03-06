@@ -22,6 +22,16 @@ def f(i, k, x):
         elem <<= 1
     return x
 
+def round(i, k, L, R):
+    # Call f() with round num, key, and input
+    X = f(i, k, R)
+    #Xor Left half with f() result
+    X = [a ^ b for (a,b) in zip(L, X)]
+    #Swap the two halfs
+    L = R
+    R = X
+    return L, R
+
 if __name__ == '__main__':
     if len(sys.argv[1:]) < 2:
         print("give me mode!")
@@ -38,13 +48,7 @@ if __name__ == '__main__':
             #Split the block
             L, R = B[:8], B[8:]
             for j in range(8):
-                # Call f() with round num, key, and input
-                X = f(j, K, R)
-                #Xor Left half with f() result
-                X = [a ^ b for (a,b) in zip(L, X)]
-                #Swap the two halfs
-                L = R
-                R = X
+                L, R = round(j, K, L, R)
             #Write the ciphertext block back
             P[i * 16 : i * 16 + 16] = R + L
         with open(sys.argv[3], 'wb') as out:
@@ -58,13 +62,7 @@ if __name__ == '__main__':
             #Split the block
             L, R = B[:8], B[8:]
             for j in reversed(range(8)):
-                # Call f() with round num, key, and input
-                X = f(j, K, R)
-                #Xor Left half with f() result
-                X = [a ^ b for (a,b) in zip(L, X)]
-                #Swap the two halfs
-                L = R
-                R = X
+                L, R = round(j, K, L, R)
             #Write the ciphertext block back
             P[i * 16 : i * 16 + 16] = R + L
         P = pkcs7_strip(P)
