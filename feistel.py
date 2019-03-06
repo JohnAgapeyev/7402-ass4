@@ -36,10 +36,9 @@ if __name__ == '__main__':
                 X = f(j, K, R)
                 #Xor Left half with f() result
                 X = [a ^ b for (a,b) in zip(L, X)]
-                if j < 7:
-                    #Swap the two halfs
-                    L = R
-                    R = X
+                #Swap the two halfs
+                L = R
+                R = X
             #Write the ciphertext block back
             P[i * 16 : i * 16 + 16] = R + L
         with open(sys.argv[3], 'wb') as out:
@@ -57,10 +56,9 @@ if __name__ == '__main__':
                 X = f(j, K, R)
                 #Xor Left half with f() result
                 X = [a ^ b for (a,b) in zip(L, X)]
-                if j > 0:
-                    #Swap the two halfs
-                    L = R
-                    R = X
+                #Swap the two halfs
+                L = R
+                R = X
             #Write the ciphertext block back
             P[i * 16 : i * 16 + 16] = R + L
         print(P)
