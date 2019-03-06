@@ -41,12 +41,11 @@ if __name__ == '__main__':
                     L = R
                     R = X
             #Write the ciphertext block back
-            P[i * 16 : i * 16 + 16] = L + R
+            P[i * 16 : i * 16 + 16] = R + L
         with open(sys.argv[3], 'wb') as out:
             out.write(P)
     else:
         P = bytearray(open(sys.argv[2], 'rb').read())
-        print(P)
         #i is block num, j is round number
         for i in range(len(P) // 16):
             #Grab the block
@@ -58,10 +57,10 @@ if __name__ == '__main__':
                 X = f(j, K, R)
                 #Xor Left half with f() result
                 X = [a ^ b for (a,b) in zip(L, X)]
-                if True:
+                if j > 0:
                     #Swap the two halfs
                     L = R
                     R = X
             #Write the ciphertext block back
-            P[i * 16 : i * 16 + 16] = L + R
+            P[i * 16 : i * 16 + 16] = R + L
         print(P)
