@@ -10,6 +10,12 @@ def pkcs7_pad(x):
         padding = 16 - (len(x) % 16)
     return x + bytes([padding]) * padding
 
+def pkcs7_strip(x):
+    for i in range(x[-1]):
+        if x[-(i + 1)] != x[-1]:
+            raise ValueError('Input is not padded or padding is corrupt')
+    return x[:-x[-1]]
+
 def f(i, k, x):
     for elem in x:
         elem *= 3
@@ -61,4 +67,5 @@ if __name__ == '__main__':
                 R = X
             #Write the ciphertext block back
             P[i * 16 : i * 16 + 16] = R + L
+        P = pkcs7_strip(P)
         print(P)
