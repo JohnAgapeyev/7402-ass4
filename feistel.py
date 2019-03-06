@@ -3,10 +3,7 @@
 import sys
 
 def pkcs7_pad(x):
-    if len(x) % 16 == 0:
-        padding = 16
-    else:
-        padding = 16 - (len(x) % 16)
+    padding = 16 - ((len(x) % 16 != 0) * (len(x) % 16))
     return x + bytes([padding]) * padding
 
 def pkcs7_strip(x):
@@ -15,6 +12,7 @@ def pkcs7_strip(x):
             raise ValueError('Input is not padded or padding is corrupt')
     return x[:-x[-1]]
 
+#This is completely arbitrary, and bad
 def f(i, k, x):
     for elem in x:
         elem *= i
