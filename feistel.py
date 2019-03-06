@@ -3,13 +3,25 @@
 import os
 import sys
 
-def f(i, k, x):
-    for j in range(len(x) // 2):
-        x[j] = x[len(x) - j - 1]
-    return x
-    #return bytes(((2 * i * k)**int.from_bytes(x, byteorder='big')) % 15)
+def pkcs7_pad(x):
+    if len(x) % 16 == 0:
+        padding = 16
+    else:
+        padding = 16 - (len(x) % 16)
+    return x + bytes([padding]) * padding
 
-P = bytearray('abcdefghijklmnop', 'utf8')
+def f(i, k, x):
+    for elem in x:
+        elem *= i
+        elem <<= k
+    return x
+
+P = bytearray('abcdefghijklmno', 'utf8')
+
+P = pkcs7_pad(P)
+
+print(P)
+
 K = 7
 
 #i is block num, j is round number
@@ -22,7 +34,6 @@ for i in range(len(P) // 16):
         # Call f() with round num, key, and input
         X = f(j, K, R)
         #Xor Left half with f() result
-        #X = L ^ X
         X = [a ^ b for (a,b) in zip(L, X)]
         if j < 7:
             #Swap the two halfs
