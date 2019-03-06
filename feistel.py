@@ -22,15 +22,8 @@ def f(i, k, x):
         elem <<= 1
     return x
 
-def round(i, k, L, R):
-    # Call f() with round num, key, and input
-    X = f(i, k, R)
-    #Xor Left half with f() result
-    X = [a ^ b for (a,b) in zip(L, X)]
-    #Swap the two halfs
-    L = R
-    R = X
-    return L, R
+def round(i, K, L, R):
+    return R, [a ^ b for (a,b) in zip(L, f(i, K, R))]
 
 if __name__ == '__main__':
     if len(sys.argv[1:]) < 2:
