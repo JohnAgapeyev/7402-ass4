@@ -2,10 +2,12 @@
 
 import sys
 
+#ensure data is the correct length
 def pkcs7_pad(x):
     padding = 16 - ((len(x) % 16 != 0) * (len(x) % 16))
     return x + bytes([padding]) * padding
 
+#remove and check the padding
 def pkcs7_strip(x):
     for i in range(x[-1]):
         if x[-(i + 1)] != x[-1]:
@@ -13,6 +15,7 @@ def pkcs7_strip(x):
     return x[:-x[-1]]
 
 #This is completely arbitrary, and bad
+#dont use this f
 def f(i, k, x):
     for elem in x:
         elem *= i
@@ -33,10 +36,10 @@ def process_block(B, rounds, subkeys):
 # mode is 'e' for encrypt, else decrypt
 if __name__ == '__main__':
     if len(sys.argv[1:]) != 3:
-        print("give me args!")
+        print("usage: ./feistel.py {e, d} /path/to/input /path/to/output")
         sys.exit(1)
 
-    round_count = 8
+    round_count = 6
 
     #Master secret key
     K = 7
@@ -57,7 +60,7 @@ if __name__ == '__main__':
             P[start_block : end_block] = B
         with open(sys.argv[3], 'wb') as out:
             out.write(P)
-    else:
+    elif sys.argv[1] == 'd':
         P = bytearray(open(sys.argv[2], 'rb').read())
         if len(P) % 16 != 0:
             raise ValueError('Ciphertext is not a valid length, it must be corrupted')
@@ -73,3 +76,5 @@ if __name__ == '__main__':
         P = pkcs7_strip(P)
         with open(sys.argv[3], 'wb') as out:
             out.write(P)
+    else:
+        print("unknown directive {}".format(sys.argv[1]))
